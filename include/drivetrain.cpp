@@ -7,69 +7,71 @@
 /*                                                                            */
 /*----------------------------------------------------------------------------*/
 #include "v5_vcs.h"
+#define MIN(a, b) a < b ? a : b;
+#define MAX(a, b) a > b ? a : b;
 
-// A global instance of vex::brain used for printing to the V5 brain screen
 class Drivetrain{
-  protected:
+  public:
     typedef struct{
+      /*
+        this structure holds the motor
+        pointers for one side of the robot
+      */
       vex::motor *front;
       vex::motor *middle;
       vex::motor *rear;
-    } SideMotors;
-    typedef struct {
-      SideMotors leftMotors;
-      SideMotors rightMotors;
-    } DrivetrainMotors;
-  
-  public:
-    DrivetrainMotors drivetrainMotors;
-    enum DriveMode{
-      TankDrive,
-      ArcadeDrive
+    }SideMotor;
+    typedef struct{
+      /*
+        this structure holds two SideMotor
+        structs and is the main access to 
+        the motors in this class 
+      */
+      SideMotor leftSide;
+      SideMotor rightSide;
+    }DrivetrainMotors;
+    typedef struct{
+      vex::controller *primary;
+      vex::controller *partner;
+    } Controllers;
+    enum ControlMode{
+      /*
+        This enum contains the different modes of 
+        controlling the drivetrain
+        ------------------------------------------
+        | Controller = Main Controller           |
+        | Partner = Partner Controller           |
+        | Manual = No Controller, for automation |
+        ------------------------------------------
+      */
+      Controller,
+      Partner,
+      Manual,
     };
-    Drivetrain(){
-      
+    enum DriveMode{
+      /*
+        this enum holds the different driving
+        control modes for the robot
+      */
+      TankDrive,
+      ArcadeDrive,
+    };
+    void setDriveMode(DriveMode mode){
+      /*
+        this method changes the different
+        drive modes of the robot
+      */
+      driveMode = mode;
     }
-    ~Drivetrain(){
-
+    void setControlMode(ControlMode mode){
+      /*
+        this method changes how the robot
+        is controlled
+      */
+      controlMode = mode;
     }
-    void setDriveMode(DriveMode* mode){
-
-    }
-    void setMaximumVelocity(int vel){
-      maximumVelocity = vel;
-    }
-    void setVelocityUnits(vex::velocityUnits units){
-      velocityUnit = units;
-    }
-    void enableController(vex::controller control){
-      con = &control;
-    }
-  
-  protected:
-    int maximumVelocity = 50;
-    vex::velocityUnits velocityUnit = vex::velocityUnits::pct;
-    vex::controller *con;
-    DriveMode driveMode;
-    
-  private:
-    void tankDrive(vex::controller con){
-      if (drivetrainMotors.leftMotors.front != NULL){
-        drivetrainMotors.leftMotors.front->setVelocity(con.Axis1.value(), velocityUnit);
-      }
-      if (drivetrainMotors.leftMotors.middle != NULL){
-        drivetrainMotors.leftMotors.middle->setVelocity(con.Axis1.value(), velocityUnit);
-      }
-      if (drivetrainMotors.leftMotors.rear != NULL){
-        drivetrainMotors.leftMotors.middle->setVelocity(con.Axis1.value(), velocityUnit);
-      }
-      if (drivetrainMotors.rightMotors.front != NULL){
-        drivetrainMotors.rightMotors.front->setVelocity(con.Axis3.value(), velocityUnit);
-      }
-
-    }
-    
-    
-    
-    
+    private:
+      DriveMode driveMode;
+      ControlMode controlMode;
+      Controllers controllers;
 };
